@@ -7,9 +7,9 @@ export interface Message {
 export interface User {
   username: string;
   email: string;
-  isAvatarImageSet: boolean;
-  _id: string;
-  password: string;
+  isAvatarImageSet?: boolean;
+  id: string;
+  password?: string;
   __v?: number;
-  avatarImage: string;
+  avatarImage?: string;
 }

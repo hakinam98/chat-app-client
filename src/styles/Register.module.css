@@ -16,7 +16,7 @@
   justify-content: center;
 }
 
-.brand Image {
+.brand .image {
   height: 5rem;
 }
 .brand h1 {

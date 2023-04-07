@@ -4,7 +4,6 @@ import { AxiosResponse } from "axios";
 import { User } from "../interfaces";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-console.log(API_URL);
 
 interface ILogin {
   user?: User;
@@ -33,3 +32,13 @@ export const login = (FormData: {
   email: string;
   password: string;
 }): Promise<AxiosResponse<ILogin>> => API.post("auth/login", FormData);
+
+export const getAllUsers = (
+  currentUserId: string,
+  accessToken: string
+): Promise<AxiosResponse<User[]>> =>
+  API.get(`/users/${currentUserId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });

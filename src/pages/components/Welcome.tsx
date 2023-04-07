@@ -1,6 +1,6 @@
 ﻿import Image from "next/image";
 import Logout from "./Logout";
-import styled from "styled-components";
+import styles from "@/styles/Welcome.module.css";
 
 interface WelcomeProps {
   currentUsername: string;
@@ -8,41 +8,24 @@ interface WelcomeProps {
 
 const Welcome: React.FC<WelcomeProps> = ({ currentUsername }) => {
   return (
-    <Container>
-      <div className="logoutButton">
+    <main className={styles.main}>
+      <div className={styles.logoutButton}>
         <Logout />
       </div>
-      <img src="/hello.gif" alt="Dog saying Hi!" />
+      <Image
+        className={styles.image}
+        src="/hello.gif"
+        alt="Dog saying Hi!"
+        height={200}
+        width={200}
+        priority
+      />
       <h1>
         Welcome, <span>{currentUsername}!</span>
       </h1>
       <h3>Please select a chat to Start messaging.</h3>
-    </Container>
+    </main>
   );
 };
-
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  flex-direction: column;
-  text-align: center;
-  position: relative;
-  .logoutButton {
-    position: absolute;
-    right: 1.5rem;
-    top: 1.5rem;
-  }
-  img {
-    height: 13rem;
-    @media screen and (min-width: 720px) {
-      height: 20rem;
-    }
-  }
-  span {
-    color: rgb(255, 82, 161);
-  }
-`;
 
 export default Welcome;

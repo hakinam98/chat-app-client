@@ -1,0 +1,135 @@
+.main {
+  /* display: grid; */
+  align-items: center;
+  /* grid-template-columns: 15% 70% 15%; */
+  background-color: #00000076;
+  border-top: 0.2px solid #ffffff15;
+  display: flex;
+  padding: 0 2rem;
+  justify-content: space-between;
+  align-content: space-between;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  color: white;
+  padding-right: 1rem;
+}
+.emoji {
+  position: relative;
+}
+.emoji1 {
+  padding-left: 1rem;
+  position: relative;
+}
+.emoji1 svg {
+  font-size: 2.3rem;
+  color: rgb(65, 255, 65);
+  cursor: pointer;
+}
+.emoji svg {
+  font-size: 2.3rem;
+  color: #ffff00c8;
+  cursor: pointer;
+}
+.emojiPickerReact {
+  position: absolute;
+  top: -470px;
+  border-color: #9a86f3;
+  border-radius: 5%;
+}
+.emojiScrollWrapper::-webkit-scrollbar {
+  background-color: #080420;
+  width: 5px;
+}
+
+.emojiScrollWrapper::-webkit-scrollbar-thumb {
+  background-color: #9a86f3;
+}
+.emoji-categories button {
+  filter: contrast(0);
+}
+
+.emojiSearch {
+  background-color: transparent;
+  border-color: #9a86f3;
+}
+
+.emojiGroup:before {
+  background-color: #080420;
+}
+
+.inputContainer {
+  width: 100%;
+  border-radius: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.inputContainer input {
+  width: 90%;
+  height: 60%;
+  background-color: transparent;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 1.3rem;
+  background-color: #ffffff34;
+}
+
+.inputContainer input::selection {
+  background-color: #9a86f3;
+}
+
+.inputContainer input:focus {
+  outline: none;
+}
+
+.inputContainer button {
+  padding: 0.1rem 0.1rem;
+  border-radius: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+}
+
+.inputContainer button svg {
+  font-size: 2.3rem;
+  color: rgb(0, 135, 255);
+}
+
+.imageSend .addImageBtn {
+  color: white;
+  background: transparent;
+  outline: none;
+  border: none;
+  padding-left: 0.6rem;
+  cursor: pointer;
+}
+
+.imageSend .image {
+  width: 2.3rem;
+  height: 2.3rem;
+}
+@media screen and (max-width: 720px) {
+  .inputContainer button {
+    padding: 0.2rem 0.2rem;
+  }
+  .inputContainer button svg {
+    font-size: 1.5rem;
+  }
+  .imageSend .image {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .emoji svg {
+    font-size: 1.5rem;
+    color: #ffff00c8;
+    cursor: pointer;
+  }
+}
