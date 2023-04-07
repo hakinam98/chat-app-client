@@ -1,0 +1,14 @@
+﻿.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: rgb(255, 82, 161);
+  border: none;
+  cursor: pointer;
+}
+.button .svg {
+  font-size: 1.3rem;
+  color: #ebe7ff;
+}

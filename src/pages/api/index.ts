@@ -1,13 +1,14 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
+import { AxiosResponse } from "axios";
 import { User } from "../interfaces";
 
-const API_URL = process.env.API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+console.log(API_URL);
 
 interface ILogin {
-  status?: boolean;
   user?: User;
-  msg?: string;
+  accessToken?: string;
 }
 
 interface ISetAvatar {
@@ -26,9 +27,9 @@ export const signUp = (FormData: {
   password: string;
   username: string;
   email: string;
-}) => API.post("/users", FormData);
+}) => API.post("auth/signup", FormData);
 
 export const login = (FormData: {
   email: string;
   password: string;
-}): Promise<AxiosResponse<ISetAvatar>> => API.post("/auth/login", FormData);
+}): Promise<AxiosResponse<ILogin>> => API.post("auth/login", FormData);

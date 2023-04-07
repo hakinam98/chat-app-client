@@ -1,19 +1,23 @@
-import { FormEvent, useState, useEffect } from "react";
+﻿import { FormEvent, useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastOptions } from "react-toastify/dist/types";
-import { login } from "./api";
+import { signUp } from "./api";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "@/styles/Login.module.css";
+import styles from "@/styles/Register.module.css";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-export default function Login() {
+export default function Register() {
   const [values, setValues] = useState({
+    username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
+
+  const router = useRouter();
 
   const toastOptions: ToastOptions = {
     position: "bottom-right",
@@ -22,8 +26,6 @@ export default function Login() {
     draggable: true,
     theme: "dark",
   };
-
-  const router = useRouter();
 
   useEffect(() => {
     if (localStorage.getItem("user")) {
@@ -34,9 +36,9 @@ export default function Login() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (handleValidation()) {
-      const { password, email } = values;
+      const { password, username, email } = values;
       try {
-        const { data } = await login({ password, email });
+        const { data } = await signUp({ password, username, email });
         console.log(data);
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
@@ -49,12 +51,18 @@ export default function Login() {
   };
 
   const handleValidation = () => {
-    const { password, email } = values;
-    if (password === "") {
-      toast.error("Username and password are required", toastOptions);
+    const { password, confirmPassword, username, email } = values;
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match", toastOptions);
+      return false;
+    } else if (username.length < 4) {
+      toast.error("Username should have at least 4 characters", toastOptions);
+      return false;
+    } else if (password.length > 8) {
+      toast.error("Password should have at least 8 characters", toastOptions);
       return false;
     } else if (email === "") {
-      toast.error("Username and password are required", toastOptions);
+      toast.error("Email is required", toastOptions);
       return false;
     }
     return true;
@@ -68,7 +76,6 @@ export default function Login() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <main className={styles.main}>
         <form className={styles.form} onSubmit={(event) => handleSubmit(event)}>
           <div className={styles.brand}>
@@ -76,26 +83,34 @@ export default function Login() {
             <h1>chat</h1>
           </div>
           <input
-            className={styles.input}
             type="text"
+            placeholder="Username"
+            name="username"
+            onChange={(e) => setValues({ ...values, username: e.target.value })}
+          />
+          <input
+            type="email"
             placeholder="Email"
             name="email"
             onChange={(e) => setValues({ ...values, email: e.target.value })}
           />
-
           <input
-            className={styles.input}
             type="password"
             placeholder="Password"
             name="password"
             onChange={(e) => setValues({ ...values, password: e.target.value })}
           />
-
-          <button className={styles.button} type="submit">
-            Login
-          </button>
-          <span className={styles.span}>
-            Dont have an account? <Link href="/register">Register</Link>
+          <input
+            type="password"
+            placeholder="Confirm password"
+            name="confirmPassword"
+            onChange={(e) =>
+              setValues({ ...values, confirmPassword: e.target.value })
+            }
+          />
+          <button type="submit">Create User</button>
+          <span>
+            Already have an account? <Link href="/login">Login</Link>
           </span>
         </form>
       </main>
