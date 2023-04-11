@@ -9,15 +9,20 @@ import ImageUploading, {
 import Image from "next/image";
 import styles from "@/styles/ChatInput.module.css";
 import Link from "next/link";
+import Modal from "react-modal";
+import VideoCall from "./VideoCall";
 
 interface ChatInputProps {
   currentChatId: number;
   handleSendMessage: (msg: string, img: string) => {};
+  socket: any;
+  setCall: any;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
   handleSendMessage,
   currentChatId,
+  setCall,
 }) => {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -25,6 +30,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
   };
+  // const [isOpen, setIsOpen] = useState(false);
 
   const handleEmojiClick = (emojiObject: EmojiClickData, event: MouseEvent) => {
     let message = msg;
@@ -51,7 +57,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleError = (errors: any, _: any) => {
     console.log(errors);
   };
-
+  const modalVideoCall = () => {};
   return (
     <main className={styles.main}>
       <div className={styles.buttonContainer}>
@@ -64,9 +70,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           )}
         </div>
         <div className={styles.emoji1}>
-          <Link href={`/videocall?to=${currentChatId}`} target="_blank">
-            <BsCameraVideoFill />
-          </Link>
+          <BsCameraVideoFill onClick={() => setCall(true)} />
         </div>
       </div>
       <form

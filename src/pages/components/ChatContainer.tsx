@@ -11,6 +11,7 @@ interface ChatContainerProps {
   currentUser: User | undefined;
   socket: any;
   accessToken: any;
+  setCall: any;
 }
 
 const ChatContainer: React.FC<ChatContainerProps> = ({
@@ -18,6 +19,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
   currentUser,
   accessToken,
   socket,
+  setCall,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [arrivalMessage, setArrivalMessage] = useState<Message>();
@@ -132,6 +134,8 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
       <ChatInput
         handleSendMessage={handleSendMessage}
         currentChatId={currentChat.id}
+        socket={socket}
+        setCall={setCall}
       />
     </main>
   );

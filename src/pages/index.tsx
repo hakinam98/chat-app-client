@@ -9,14 +9,19 @@ import { getAllUsers, host } from "./api";
 import { useRouter } from "next/router";
 import ChatContainer from "./components/ChatContainer";
 import { Socket, io } from "socket.io-client";
+import VideoCall from "./components/VideoCall";
+import dynamic from "next/dynamic";
 
-const inter = Inter({ subsets: ["latin"] });
+const DynamicVideoCall = dynamic(() => import("./components/VideoCall"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [contacts, setContacts] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User>();
   const [currentChat, setCurrentChat] = useState(undefined);
   const [accessToken, setAccessToken] = useState(undefined);
+  const [isCall, setCall] = useState(false);
   const router = useRouter();
   const socket = useRef<Socket>();
 
@@ -38,6 +43,7 @@ export default function Home() {
       });
     }
   }, [currentUser]);
+
   useEffect(() => {
     const setToken = async () => {
       if (!localStorage.getItem("accessToken")) {
@@ -65,6 +71,12 @@ export default function Home() {
   const handleChatChange = (chat: any) => {
     setCurrentChat(chat);
   };
+
+  // useEffect(() => {
+  //   socket.current?.on("calling", (data: any) => {
+  // console.log(data);
+  //   });
+  // });
   return (
     <>
       <Head>
@@ -74,13 +86,23 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.container}>
-          <Contacts
-            contacts={contacts}
-            currentUser={currentUser}
-            changeChat={handleChatChange}
-          />
-
+        <div className={!isCall ? styles.container : styles.containerCall}>
+          {!isCall ? (
+            <Contacts
+              contacts={contacts}
+              currentUser={currentUser}
+              changeChat={handleChatChange}
+            />
+          ) : (
+            <DynamicVideoCall
+              currentChat={currentChat}
+              currentUser={currentUser}
+              accessToken={accessToken}
+              socket={socket}
+              isCall={isCall}
+              setCall={setCall}
+            />
+          )}
           {currentChat === undefined ? (
             <Welcome currentUsername={currentUser?.username || ""} />
           ) : (
@@ -89,6 +111,7 @@ export default function Home() {
               currentUser={currentUser}
               accessToken={accessToken}
               socket={socket}
+              setCall={setCall}
             />
           )}
         </div>
