@@ -8,9 +8,6 @@ import ImageUploading, {
 } from "react-images-uploading";
 import Image from "next/image";
 import styles from "@/styles/ChatInput.module.css";
-import Link from "next/link";
-import Modal from "react-modal";
-import VideoCall from "./VideoCall";
 
 interface ChatInputProps {
   currentChatId: number;
@@ -57,7 +54,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleError = (errors: any, _: any) => {
     console.log(errors);
   };
-  const modalVideoCall = () => {};
+
   return (
     <main className={styles.main}>
       <div className={styles.buttonContainer}>

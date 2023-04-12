@@ -10,6 +10,7 @@ import {
   BsCameraVideoOffFill,
   BsFillMicFill,
   BsFillMicMuteFill,
+  BsFillTelephoneForwardFill,
   BsFillTelephoneXFill,
 } from "react-icons/bs";
 import { Peer } from "peerjs";
@@ -33,13 +34,14 @@ const VideoCall: React.FC<VideoCallProps> = ({
   const [errorSetting, seterrorSetting] = useState("");
   const myVideoRef = useRef(); //Your video
   const peerVideoRef = useRef(); //The other users video
-  const myStreamRef = useRef(); //Our video stream
+  // const myStreamRef = useRef(null); //Our video stream
   const [done, setdone] = useState(false);
   // const [currentUser, setCurrentUser] = useState<User>();
   const [isVideo, setVideo] = useState(true);
   const [isMic, setMic] = useState(true);
   const [peerId, setPeerId] = useState<string>("");
   const router = useRouter();
+  const peerInstance = useRef();
 
   const toastOptions: ToastOptions = {
     position: "bottom-right",
@@ -49,78 +51,97 @@ const VideoCall: React.FC<VideoCallProps> = ({
     theme: "dark",
   };
 
-  const peer = new Peer();
   useEffect(() => {
+    const peer = new Peer();
+
     peer.on("open", (id) => {
       socket.current.emit("peer-id", {
         peer_id: id,
         user_id: currentUser?.id,
       });
     });
-  }, [peer]);
 
-  useEffect(() => {
-    if (isCall) {
-      socket.current.emit("call-to", {
-        from: currentUser?.id,
-        to: currentChat.id,
-      });
-      socket.current.emit("get-peer-id", currentChat.id);
-      socket.current.on("rec-peer-id", (peerId: string) => {
-        setPeerId(peerId);
-      });
-    }
-  }, [isCall]);
-
-  useEffect(() => {
-    //Getting our Video and Audio
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: isMic ? true : false,
+    peer.on("call", (call) => {
+      var getUserMedia = navigator.mediaDevices.getUserMedia;
+      getUserMedia({
         video: isVideo ? true : false,
-      })
-      .then((stream) => {
-        myStreamRef.current = stream;
-        myVideoRef.current.srcObject = stream;
-        const call = peer.call(peerId, stream);
-        call.on("stream", function (stream) {
-          peerVideoRef.current.srcObject = stream;
-          console.log("peerrrrrrrrr", peerVideoRef);
-        });
-
-        call.on("error", (err) => {
-          alert(err);
-        });
-      })
-      .catch((err) => {
-        /* handle the error */
-        console.log(err);
-      });
-  }, [peerId]);
-
-  useEffect(() => {
-    //Getting our Video and Audio
-    navigator.mediaDevices
-      .getUserMedia({
         audio: isMic ? true : false,
-        video: isVideo ? true : false,
-      })
-      .then((stream) => {
-        peer.on("call", (call) => {
-          call.answer(stream);
-          call.on("stream", function (stream) {
-            console.log(1);
-
-            peerVideoRef.current.srcObject = stream;
-            console.log("peerrrrrrrrr", peerVideoRef);
-          });
+      }).then((mediaStream) => {
+        // myVideoRef.current = mediaStream;
+        myVideoRef.current.srcObject = mediaStream;
+        // myVideoRef.current.play();
+        call.answer(mediaStream);
+        call.on("stream", (peerStream) => {
+          console.log(peerStream);
+          peerVideoRef.current.srcObject = peerStream;
+          // peerVideoRef.current.play();
         });
-      })
-      .catch((err) => {
-        /* handle the error */
-        console.log(err);
       });
+    });
+
+    peerInstance.current = peer;
   }, []);
+
+  // useEffect(() => {
+  //   if (isCall) {
+  //     socket.current.emit("call-to", {
+  //       from: currentUser?.id,
+  //       to: currentChat.id,
+  //     });
+  //     socket.current.emit("get-peer-id", currentChat.id);
+  //     socket.current.on("rec-peer-id", (peerId: string) => {
+  //       setPeerId(peerId);
+  //     });
+  //   }
+
+  //   var getUserMedia = navigator.mediaDevices.getUserMedia;
+  //   getUserMedia({
+  //     video: isVideo ? true : false,
+  //     audio: isMic ? true : false,
+  //   }).then((mediaStream) => {
+  //     // myVideoRef.current = mediaStream;
+  //     myVideoRef.current.srcObject = mediaStream;
+  //     // myVideoRef.current.play();
+
+  //     const call = peerInstance.current.call(peerId, mediaStream);
+
+  //     call.on("stream", (peerStream) => {
+  //       peerVideoRef.current.srcObject = peerStream;
+  //       // peerVideoRef.current.play();
+  //     });
+  //   });
+  // }, [isCall]);
+
+  const handleCall = () => {
+    console.log("Call");
+
+    socket.current.emit("call-to", {
+      from: currentUser?.id,
+      to: currentChat.id,
+    });
+    socket.current.emit("get-peer-id", currentChat.id);
+    socket.current.on("rec-peer-id", (peerId: string) => {
+      setPeerId(peerId);
+    });
+
+    var getUserMedia = navigator.mediaDevices.getUserMedia;
+    getUserMedia({
+      video: isVideo ? true : false,
+      audio: isCall ? true : false,
+    }).then((mediaStream) => {
+      myVideoRef.current.srcObject = mediaStream;
+      // myVideoRef.current.play();
+
+      const call = peerInstance.current.call(peerId, mediaStream);
+
+      call.on("stream", (peerStream) => {
+        console.log(peerStream);
+
+        peerVideoRef.current.srcObject = peerStream;
+        // peerVideoRef.current.play();
+      });
+    });
+  };
 
   return (
     <main className={styles.main}>
@@ -129,8 +150,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
         <video
           autoPlay
           ref={peerVideoRef}
-          playsInline
-          width={"70%"}
+          // playsInline
+          width={"100%"}
           // height={"100%"}
         />
         <div className={styles.videoContainerCurrent}>
@@ -141,7 +162,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 ref={myVideoRef}
                 muted
                 playsInline
-                width={"250px"}
+                width={"100px"}
               />
             </div>
           ) : (
@@ -160,6 +181,13 @@ const VideoCall: React.FC<VideoCallProps> = ({
         </div>
       </div>
       <div className={styles.buttonContainer}>
+        <div className={styles.emoji}>
+          <BsFillTelephoneForwardFill
+            className={styles.svg1}
+            onClick={() => handleCall()}
+          />
+          <h5>Call/Answer</h5>
+        </div>
         <div className={styles.emoji}>
           {isVideo === false ? (
             <BsCameraVideoOffFill

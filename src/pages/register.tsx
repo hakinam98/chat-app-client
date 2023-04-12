@@ -31,7 +31,7 @@ export default function Register() {
     if (localStorage.getItem("user")) {
       router.replace("/");
     }
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
