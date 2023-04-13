@@ -52,7 +52,11 @@ const VideoCall: React.FC<VideoCallProps> = ({
   };
 
   useEffect(() => {
-    const peer = new Peer();
+    const peer = new Peer({
+      host: "localhost",
+      port: 9000,
+      path: "/myapp",
+    });
 
     peer.on("open", (id) => {
       socket.current.emit("peer-id", {

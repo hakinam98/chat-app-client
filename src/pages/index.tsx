@@ -9,10 +9,12 @@ import { getAllUsers, host } from "./api";
 import { useRouter } from "next/router";
 import ChatContainer from "./components/ChatContainer";
 import { Socket, io } from "socket.io-client";
-import VideoCall from "./components/VideoCall";
 import dynamic from "next/dynamic";
 
 const DynamicVideoCall = dynamic(() => import("./components/VideoCall"), {
+  ssr: false,
+});
+const DynamicPeer = dynamic(() => import("./components/ConnectPeer"), {
   ssr: false,
 });
 
@@ -73,6 +75,20 @@ export default function Home() {
   };
 
   // useEffect(() => {
+  //   const peer = new Peer({
+  //     host: "localhost",
+  //     port: 9000,
+  //     path: "/myapp",
+  //   });
+
+  //   peer.on("open", (id) => {
+  //     socket.current.emit("peer-id", {
+  //       peer_id: id,
+  //       user_id: currentUser?.id,
+  //     });
+  //   });
+  // });
+  // useEffect(() => {
   //   socket.current?.on("calling", (data: any) => {
   // console.log(data);
   //   });
@@ -86,6 +102,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        <DynamicPeer socket={socket.current} />
         <div className={!isCall ? styles.container : styles.containerCall}>
           {!isCall ? (
             <Contacts
