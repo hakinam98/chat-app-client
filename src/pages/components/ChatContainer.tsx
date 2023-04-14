@@ -1,10 +1,11 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React, { Ref, useEffect, useRef, useState } from "react";
 import Logout from "./Logout";
 import { Message, User } from "../interfaces";
 import { v4 as uuidv4 } from "uuid";
 import Image from "next/image";
 import styles from "@/styles/ChatContainer.module.css";
 import ChatInput from "./ChatInput";
+import dynamic from "next/dynamic";
 
 interface ChatContainerProps {
   currentChat: any;
@@ -12,7 +13,12 @@ interface ChatContainerProps {
   socket: any;
   accessToken: any;
   setCall: any;
+  peerInstance: any;
+  myVideoRef: any;
+  // setMyVideoRef: any;
 }
+
+const DynamicChatInput = dynamic(() => import("./ChatInput"), { ssr: false });
 
 const ChatContainer: React.FC<ChatContainerProps> = ({
   currentChat,
@@ -20,6 +26,9 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
   accessToken,
   socket,
   setCall,
+  peerInstance,
+  myVideoRef,
+  // setMyVideoRef,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [arrivalMessage, setArrivalMessage] = useState<Message>();
@@ -131,11 +140,15 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
           })}
         </div>
       )}
-      <ChatInput
+      <DynamicChatInput
         handleSendMessage={handleSendMessage}
         currentChatId={currentChat.id}
         socket={socket}
         setCall={setCall}
+        currentUser={currentUser}
+        peerInstance={peerInstance}
+        // setMyVideoRef={setMyVideoRef}
+        myVideoRef={myVideoRef}
       />
     </main>
   );

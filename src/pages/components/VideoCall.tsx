@@ -22,6 +22,7 @@ interface VideoCallProps {
   accessToken: any;
   setCall: any;
   isCall: boolean;
+  myVideoRef: any;
 }
 
 const VideoCall: React.FC<VideoCallProps> = ({
@@ -30,10 +31,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
   currentUser,
   setCall,
   isCall,
+  myVideoRef,
 }) => {
   const [errorSetting, seterrorSetting] = useState("");
-  const myVideoRef = useRef(); //Your video
-  const peerVideoRef = useRef(); //The other users video
+
   // const myStreamRef = useRef(null); //Our video stream
   const [done, setdone] = useState(false);
   // const [currentUser, setCurrentUser] = useState<User>();
@@ -43,6 +44,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
   const router = useRouter();
   const peerInstance = useRef();
 
+  console.log(myVideoRef);
+
   const toastOptions: ToastOptions = {
     position: "bottom-right",
     autoClose: 8000,
@@ -51,40 +54,40 @@ const VideoCall: React.FC<VideoCallProps> = ({
     theme: "dark",
   };
 
-  useEffect(() => {
-    const peer = new Peer({
-      host: "localhost",
-      port: 9000,
-      path: "/myapp",
-    });
+  // useEffect(() => {
+  //   const peer = new Peer({
+  //     host: "localhost",
+  //     port: 9000,
+  //     path: "/peer",
+  //   });
 
-    peer.on("open", (id) => {
-      socket.current.emit("peer-id", {
-        peer_id: id,
-        user_id: currentUser?.id,
-      });
-    });
+  //   peer.on("open", (id) => {
+  //     socket.current.emit("peer-id", {
+  //       peer_id: id,
+  //       user_id: currentUser?.id,
+  //     });
+  //   });
 
-    peer.on("call", (call) => {
-      var getUserMedia = navigator.mediaDevices.getUserMedia;
-      getUserMedia({
-        video: isVideo ? true : false,
-        audio: isMic ? true : false,
-      }).then((mediaStream) => {
-        // myVideoRef.current = mediaStream;
-        myVideoRef.current.srcObject = mediaStream;
-        // myVideoRef.current.play();
-        call.answer(mediaStream);
-        call.on("stream", (peerStream) => {
-          console.log(peerStream);
-          peerVideoRef.current.srcObject = peerStream;
-          // peerVideoRef.current.play();
-        });
-      });
-    });
+  //   peer.on("call", (call) => {
+  //     var getUserMedia = navigator.mediaDevices.getUserMedia;
+  //     getUserMedia({
+  //       video: isVideo ? true : false,
+  //       audio: isMic ? true : false,
+  //     }).then((mediaStream) => {
+  //       // myVideoRef.current = mediaStream;
+  //       myVideoRef.current.srcObject = mediaStream;
+  //       // myVideoRef.current.play();
+  //       call.answer(mediaStream);
+  //       call.on("stream", (peerStream) => {
+  //         console.log(peerStream);
+  //         peerVideoRef.current.srcObject = peerStream;
+  //         // peerVideoRef.current.play();
+  //       });
+  //     });
+  //   });
 
-    peerInstance.current = peer;
-  }, []);
+  //   peerInstance.current = peer;
+  // }, []);
 
   // useEffect(() => {
   //   if (isCall) {
@@ -116,48 +119,48 @@ const VideoCall: React.FC<VideoCallProps> = ({
   //   });
   // }, [isCall]);
 
-  const handleCall = () => {
-    console.log("Call");
+  // const handleCall = () => {
+  //   console.log("Call");
 
-    socket.current.emit("call-to", {
-      from: currentUser?.id,
-      to: currentChat.id,
-    });
-    socket.current.emit("get-peer-id", currentChat.id);
-    socket.current.on("rec-peer-id", (peerId: string) => {
-      setPeerId(peerId);
-    });
+  //   socket.current.emit("call-to", {
+  //     from: currentUser?.id,
+  //     to: currentChat.id,
+  //   });
+  //   socket.current.emit("get-peer-id", currentChat.id);
+  //   socket.current.on("rec-peer-id", (peerId: string) => {
+  //     setPeerId(peerId);
+  //   });
 
-    var getUserMedia = navigator.mediaDevices.getUserMedia;
-    getUserMedia({
-      video: isVideo ? true : false,
-      audio: isCall ? true : false,
-    }).then((mediaStream) => {
-      myVideoRef.current.srcObject = mediaStream;
-      // myVideoRef.current.play();
+  //   var getUserMedia = navigator.mediaDevices.getUserMedia;
+  //   getUserMedia({
+  //     video: isVideo ? true : false,
+  //     audio: isCall ? true : false,
+  //   }).then((mediaStream) => {
+  //     myVideoRef.current.srcObject = mediaStream;
+  //     // myVideoRef.current.play();
 
-      const call = peerInstance.current.call(peerId, mediaStream);
+  //     const call = peerInstance.current.call(peerId, mediaStream);
 
-      call.on("stream", (peerStream) => {
-        console.log(peerStream);
+  //     call.on("stream", (peerStream) => {
+  //       console.log(peerStream);
 
-        peerVideoRef.current.srcObject = peerStream;
-        // peerVideoRef.current.play();
-      });
-    });
-  };
+  //       peerVideoRef.current.srcObject = peerStream;
+  //       // peerVideoRef.current.play();
+  //     });
+  //   });
+  // };
 
   return (
     <main className={styles.main}>
       <div className={styles.videoContainer}>
         <h2>{currentChat.username}</h2>
-        <video
+        {/* <video
           autoPlay
           ref={peerVideoRef}
           // playsInline
           width={"100%"}
           // height={"100%"}
-        />
+        /> */}
         <div className={styles.videoContainerCurrent}>
           {isVideo ? (
             <div className={styles.video}>
@@ -185,13 +188,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
         </div>
       </div>
       <div className={styles.buttonContainer}>
-        <div className={styles.emoji}>
-          <BsFillTelephoneForwardFill
-            className={styles.svg1}
-            onClick={() => handleCall()}
-          />
-          <h5>Call/Answer</h5>
-        </div>
         <div className={styles.emoji}>
           {isVideo === false ? (
             <BsCameraVideoOffFill
