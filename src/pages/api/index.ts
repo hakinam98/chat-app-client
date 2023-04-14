@@ -14,6 +14,9 @@ interface ISetAvatar {
   image: string;
   isSet: boolean;
 }
+interface PeerId {
+  peerId: string;
+}
 
 export const host = `${API_URL}`;
 // export const host = `http://localhost:4000`;
@@ -38,6 +41,16 @@ export const getAllUsers = (
   accessToken: string
 ): Promise<AxiosResponse<User[]>> =>
   API.get(`/users/${currentUserId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+export const getPeerId = (
+  currentChatId: number,
+  accessToken: string
+): Promise<AxiosResponse<PeerId>> =>
+  API.get(`/users?currentChatId=${currentChatId}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

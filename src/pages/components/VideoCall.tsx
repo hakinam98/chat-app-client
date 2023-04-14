@@ -10,7 +10,6 @@ import {
   BsCameraVideoOffFill,
   BsFillMicFill,
   BsFillMicMuteFill,
-  BsFillTelephoneForwardFill,
   BsFillTelephoneXFill,
 } from "react-icons/bs";
 import { Peer } from "peerjs";
@@ -23,6 +22,7 @@ interface VideoCallProps {
   setCall: any;
   isCall: boolean;
   myVideoRef: any;
+  peerVideoRef: any;
 }
 
 const VideoCall: React.FC<VideoCallProps> = ({
@@ -32,6 +32,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
   setCall,
   isCall,
   myVideoRef,
+  peerVideoRef,
 }) => {
   const [errorSetting, seterrorSetting] = useState("");
 
@@ -40,11 +41,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
   // const [currentUser, setCurrentUser] = useState<User>();
   const [isVideo, setVideo] = useState(true);
   const [isMic, setMic] = useState(true);
-  const [peerId, setPeerId] = useState<string>("");
-  const router = useRouter();
-  const peerInstance = useRef();
 
-  console.log(myVideoRef);
+  console.log("myVideo", myVideoRef);
+
+  console.log("peer", peerVideoRef);
 
   const toastOptions: ToastOptions = {
     position: "bottom-right",
@@ -54,113 +54,16 @@ const VideoCall: React.FC<VideoCallProps> = ({
     theme: "dark",
   };
 
-  // useEffect(() => {
-  //   const peer = new Peer({
-  //     host: "localhost",
-  //     port: 9000,
-  //     path: "/peer",
-  //   });
-
-  //   peer.on("open", (id) => {
-  //     socket.current.emit("peer-id", {
-  //       peer_id: id,
-  //       user_id: currentUser?.id,
-  //     });
-  //   });
-
-  //   peer.on("call", (call) => {
-  //     var getUserMedia = navigator.mediaDevices.getUserMedia;
-  //     getUserMedia({
-  //       video: isVideo ? true : false,
-  //       audio: isMic ? true : false,
-  //     }).then((mediaStream) => {
-  //       // myVideoRef.current = mediaStream;
-  //       myVideoRef.current.srcObject = mediaStream;
-  //       // myVideoRef.current.play();
-  //       call.answer(mediaStream);
-  //       call.on("stream", (peerStream) => {
-  //         console.log(peerStream);
-  //         peerVideoRef.current.srcObject = peerStream;
-  //         // peerVideoRef.current.play();
-  //       });
-  //     });
-  //   });
-
-  //   peerInstance.current = peer;
-  // }, []);
-
-  // useEffect(() => {
-  //   if (isCall) {
-  //     socket.current.emit("call-to", {
-  //       from: currentUser?.id,
-  //       to: currentChat.id,
-  //     });
-  //     socket.current.emit("get-peer-id", currentChat.id);
-  //     socket.current.on("rec-peer-id", (peerId: string) => {
-  //       setPeerId(peerId);
-  //     });
-  //   }
-
-  //   var getUserMedia = navigator.mediaDevices.getUserMedia;
-  //   getUserMedia({
-  //     video: isVideo ? true : false,
-  //     audio: isMic ? true : false,
-  //   }).then((mediaStream) => {
-  //     // myVideoRef.current = mediaStream;
-  //     myVideoRef.current.srcObject = mediaStream;
-  //     // myVideoRef.current.play();
-
-  //     const call = peerInstance.current.call(peerId, mediaStream);
-
-  //     call.on("stream", (peerStream) => {
-  //       peerVideoRef.current.srcObject = peerStream;
-  //       // peerVideoRef.current.play();
-  //     });
-  //   });
-  // }, [isCall]);
-
-  // const handleCall = () => {
-  //   console.log("Call");
-
-  //   socket.current.emit("call-to", {
-  //     from: currentUser?.id,
-  //     to: currentChat.id,
-  //   });
-  //   socket.current.emit("get-peer-id", currentChat.id);
-  //   socket.current.on("rec-peer-id", (peerId: string) => {
-  //     setPeerId(peerId);
-  //   });
-
-  //   var getUserMedia = navigator.mediaDevices.getUserMedia;
-  //   getUserMedia({
-  //     video: isVideo ? true : false,
-  //     audio: isCall ? true : false,
-  //   }).then((mediaStream) => {
-  //     myVideoRef.current.srcObject = mediaStream;
-  //     // myVideoRef.current.play();
-
-  //     const call = peerInstance.current.call(peerId, mediaStream);
-
-  //     call.on("stream", (peerStream) => {
-  //       console.log(peerStream);
-
-  //       peerVideoRef.current.srcObject = peerStream;
-  //       // peerVideoRef.current.play();
-  //     });
-  //   });
-  // };
-
   return (
     <main className={styles.main}>
       <div className={styles.videoContainer}>
         <h2>{currentChat.username}</h2>
-        {/* <video
+        <video
           autoPlay
           ref={peerVideoRef}
           // playsInline
           width={"100%"}
-          // height={"100%"}
-        /> */}
+        />
         <div className={styles.videoContainerCurrent}>
           {isVideo ? (
             <div className={styles.video}>

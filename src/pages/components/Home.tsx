@@ -1,61 +1,57 @@
 import Head from "next/head";
-import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { useState, useEffect, useRef } from "react";
 import Welcome from "./Welcome";
 import { User } from "../interfaces";
 import Contacts from "./Contact";
 import { getAllUsers, host } from "../api";
-import { useRouter } from "next/router";
 import ChatContainer from "./ChatContainer";
-import { Socket, io } from "socket.io-client";
-import dynamic from "next/dynamic";
 import VideoCall from "./VideoCall";
 import Peer from "peerjs";
 
-export default function Home() {
+interface ChatHomeProps {
+  currentUser: User | undefined;
+  accessToken: any;
+  socket: any;
+}
+
+const ChatHome: React.FC<ChatHomeProps> = ({
+  currentUser,
+  accessToken,
+  socket,
+}) => {
   const [contacts, setContacts] = useState<User[]>([]);
-  const [currentUser, setCurrentUser] = useState<User>();
   const [currentChat, setCurrentChat] = useState(undefined);
-  const [accessToken, setAccessToken] = useState(undefined);
   const [isCall, setCall] = useState(false);
-  const router = useRouter();
-  const socket = useRef<Socket>();
   const myVideoRef = useRef();
-  //   const [myVideoRef, setMyVideoRef] = useState(useRef()); //Your video
-  const [peerVideoRef, setPeerVideoRef] = useState(useRef()); //The other users video
+  const peerVideoRef = useRef();
   const peerInstance = useRef();
+  const callRef = useRef();
 
   useEffect(() => {
-    const setUser = async () => {
-      if (!localStorage.getItem("user")) {
-        router.replace("/login");
-      } else {
-        setCurrentUser(await JSON.parse(localStorage.getItem("user")!));
-      }
-    };
-    setUser();
-  }, [router]);
-
-  useEffect(() => {
-    if (currentUser) {
-      socket.current! = io(`${host}?user_id=${currentUser.id}`, {
-        transports: ["websocket"],
+    if (currentUser && socket) {
+      const peer = new Peer({
+        host: "localhost",
+        port: 9000,
+        path: "/peer",
       });
-    }
-  }, [currentUser]);
 
-  useEffect(() => {
-    const setToken = async () => {
-      if (!localStorage.getItem("accessToken")) {
-        localStorage.removeItem("user");
-        router.replace("/login");
-      } else {
-        setAccessToken(await JSON.parse(localStorage.getItem("accessToken")!));
-      }
-    };
-    setToken();
-  }, [router]);
+      peer.on("open", (id: string) => {
+        console.log(id);
+
+        socket.current.emit("peer-id", {
+          peer_id: id,
+          user_id: currentUser.id,
+        });
+      });
+
+      peer.on("call", (call) => {
+        callRef.current = call;
+      });
+
+      peerInstance.current = peer;
+    }
+  }, [currentUser, socket]);
 
   useEffect(() => {
     const getContacts = async () => {
@@ -71,42 +67,23 @@ export default function Home() {
     setCurrentChat(chat);
   };
 
-  useEffect(() => {
-    const peer = new Peer({
-      host: "localhost",
-      port: 9000,
-      path: "/peer",
-    });
-
-    peer.on("open", (id) => {
-      console.log(id);
-
-      socket.current!.emit("peer-id", {
-        peer_id: id,
-        user_id: currentUser?.id,
+  const handleAnswer = async (call: any) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
       });
-    });
+      myVideoRef.current.srcObject = stream;
 
-    // peer.on("call", (call) => {
-    //   var getUserMedia = navigator.mediaDevices.getUserMedia;
-    //   getUserMedia({
-    //     video: isVideo ? true : false,
-    //     audio: isMic ? true : false,
-    //   }).then((mediaStream) => {
-    //     // myVideoRef.current = mediaStream;
-    //     myVideoRef.current.srcObject = mediaStream;
-    //     // myVideoRef.current.play();
-    //     call.answer(mediaStream);
-    //     call.on("stream", (peerStream) => {
-    //       console.log(peerStream);
-    //       peerVideoRef.current.srcObject = peerStream;
-    //       // peerVideoRef.current.play();
-    //     });
-    //   });
+      call.answer(stream);
 
-    peerInstance.current! = peer;
-  }, [currentUser?.id, socket]);
-
+      call.on("stream", (peerStream: any) => {
+        peerVideoRef.current.srcObject = peerStream;
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <Head>
@@ -132,6 +109,7 @@ export default function Home() {
               isCall={isCall}
               setCall={setCall}
               myVideoRef={myVideoRef}
+              peerVideoRef={peerVideoRef}
             />
           )}
           {currentChat === undefined ? (
@@ -145,11 +123,15 @@ export default function Home() {
               setCall={setCall}
               peerInstance={peerInstance}
               myVideoRef={myVideoRef}
-              //   setMyVideoRef={setMyVideoRef}
+              peerVideoRef={peerVideoRef}
+              handleAnswer={handleAnswer}
+              callRef={callRef}
             />
           )}
         </div>
       </main>
     </>
   );
-}
+};
+
+export default ChatHome;

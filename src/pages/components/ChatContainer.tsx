@@ -4,8 +4,8 @@ import { Message, User } from "../interfaces";
 import { v4 as uuidv4 } from "uuid";
 import Image from "next/image";
 import styles from "@/styles/ChatContainer.module.css";
-import ChatInput from "./ChatInput";
 import dynamic from "next/dynamic";
+import { BsFillTelephoneForwardFill } from "react-icons/bs";
 
 interface ChatContainerProps {
   currentChat: any;
@@ -15,7 +15,9 @@ interface ChatContainerProps {
   setCall: any;
   peerInstance: any;
   myVideoRef: any;
-  // setMyVideoRef: any;
+  peerVideoRef: any;
+  handleAnswer: any;
+  callRef: any;
 }
 
 const DynamicChatInput = dynamic(() => import("./ChatInput"), { ssr: false });
@@ -28,12 +30,23 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
   setCall,
   peerInstance,
   myVideoRef,
-  // setMyVideoRef,
+  peerVideoRef,
+  handleAnswer,
+  callRef,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [arrivalMessage, setArrivalMessage] = useState<Message>();
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [peerId, setPeerId] = useState<string>("");
+
+  const [isPeerInstanceReady, setIsPeerInstanceReady] = useState(false);
+
+  useEffect(() => {
+    if (peerInstance.current) {
+      setIsPeerInstanceReady(true);
+    }
+  }, [peerInstance]);
 
   useEffect(() => {
     const getMsg = async () => {
@@ -47,14 +60,27 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     //
   }, [currentChat, currentChat.id, currentUser]);
 
-  // useEffect(() => {
-  //   if (socket.current) {
-  //     socket.current.on("msg-recieve", (msg: string) => {
-  //       setArrivalMessage({ fromSelf: false, message: msg });
-  //       console.log(msg);
-  //     });
-  //   }
-  // }, [socket]);
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.on("msg-recieve", (msg: string) => {
+        setArrivalMessage({ fromSelf: false, type: "message", message: msg });
+        console.log(msg);
+      });
+
+      socket.current.on("rec-peer-id", (peerId: string) => {
+        setPeerId(peerId);
+      });
+
+      socket.current.on("calling", (data: any) => {
+        console.log(data);
+        setArrivalMessage({
+          fromSelf: false,
+          type: "call",
+          message: data.message,
+        });
+      });
+    }
+  }, [socket]);
 
   useEffect(() => {
     arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
@@ -66,7 +92,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
 
   const handleSendMessage = async (msg: string, image: string) => {
     if (currentUser) {
-      // await sendMessage(currentUser.id, currentChat._id, msg, image);
+      // await sendMessage(currentUser.id, currentChat.id, msg, image);
       // socket.current.emit("send-msg", {
       //   to: currentChat.id,
       //   from: currentUser?.id,
@@ -75,9 +101,20 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
       // });
     }
 
-    setMessages((msgs) => [...msgs, { fromSelf: true, message: msg, image }]);
+    setMessages((msgs) => [
+      ...msgs,
+      { fromSelf: true, type: "message", message: msg, image },
+    ]);
   };
 
+  const handleClick = () => {
+    setCall(true);
+    console.log(callRef.current);
+
+    if (callRef.current) {
+      handleAnswer(callRef.current);
+    }
+  };
   return (
     <main className={styles.main}>
       <div className={styles.chatHeader}>
@@ -117,11 +154,22 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                     message.fromSelf ? styles.sended : styles.recieved
                   }`}
                 >
-                  {message.message && (
-                    <div className={styles.content}>
-                      <p>{message.message}</p>
-                    </div>
-                  )}
+                  {message.message &&
+                    (message.type === "message" ? (
+                      <div className={styles.content}>
+                        <p>{message.message}</p>
+                      </div>
+                    ) : (
+                      <div className={styles.content}>
+                        <p>
+                          {message.message}
+                          <BsFillTelephoneForwardFill
+                            onClick={() => handleClick()}
+                          />
+                        </p>
+                      </div>
+                    ))}
+
                   {message.image && (
                     <div className={styles.contentImage}>
                       <Image
@@ -147,8 +195,11 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         setCall={setCall}
         currentUser={currentUser}
         peerInstance={peerInstance}
-        // setMyVideoRef={setMyVideoRef}
         myVideoRef={myVideoRef}
+        peerVideoRef={peerVideoRef}
+        peerId={peerId}
+        setPeerId={setPeerId}
+        accessToken={accessToken}
       />
     </main>
   );

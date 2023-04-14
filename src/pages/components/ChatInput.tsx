@@ -8,8 +8,8 @@ import ImageUploading, {
 } from "react-images-uploading";
 import Image from "next/image";
 import styles from "@/styles/ChatInput.module.css";
-import { Peer } from "peerjs";
 import { User } from "../interfaces";
+import { getPeerId } from "../api";
 
 interface ChatInputProps {
   currentChatId: number;
@@ -18,8 +18,11 @@ interface ChatInputProps {
   setCall: any;
   currentUser: User | undefined;
   peerInstance: any;
-  // setMyVideoRef: any;
   myVideoRef: any;
+  peerVideoRef: any;
+  peerId: string;
+  setPeerId: any;
+  accessToken: any;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -29,15 +32,15 @@ const ChatInput: React.FC<ChatInputProps> = ({
   socket,
   currentUser,
   peerInstance,
-  // setMyVideoRef,
   myVideoRef,
+  peerVideoRef,
+  peerId,
+  setPeerId,
+  accessToken,
 }) => {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [images] = React.useState([]);
-  const [peerId, setPeerId] = useState<string>("");
-  // const myVideoRef = useRef(); //Your video
-  const peerVideoRef = useRef(); //The other users video
 
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
@@ -69,7 +72,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     console.log(errors);
   };
 
-  const handleCall = () => {
+  const handleCall = async () => {
     setCall(true);
     console.log("Call");
 
@@ -77,31 +80,28 @@ const ChatInput: React.FC<ChatInputProps> = ({
       from: currentUser?.id,
       to: currentChatId,
     });
-    socket.current.emit("get-peer-id", currentChatId);
-    socket.current.on("rec-peer-id", (peerId: string) => {
-      setPeerId(peerId);
-    });
+    // socket.current.emit("get-peer-id", currentChatId);
+    const peerId = await getPeerId(currentChatId, accessToken);
+    console.log(peerId);
 
     var getUserMedia = navigator.mediaDevices.getUserMedia;
     getUserMedia({
       video: true,
       audio: true,
     }).then((mediaStream) => {
-      // setMyVideoRef(...current, mediaStream);
-      myVideoRef.current = mediaStream;
       if (myVideoRef.current) {
         myVideoRef.current.srcObject = mediaStream;
       }
-
-      const call = peerInstance.current.call(peerId, mediaStream);
-
-      call.on("stream", (peerStream: any) => {
-        console.log(peerStream);
-        peerVideoRef.current = peerStream;
-        if (peerVideoRef.current) {
-          peerVideoRef.current.srcObject = peerStream;
+      if (peerId) {
+        const call = peerInstance.current.call(peerId, mediaStream);
+        if (call) {
+          call.on("stream", (peerStream: any) => {
+            if (peerVideoRef.current) {
+              peerVideoRef.current.srcObject = peerStream;
+            }
+          });
         }
-      });
+      }
     });
   };
   return (
