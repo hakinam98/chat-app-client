@@ -50,7 +50,7 @@ export const getPeerId = (
   currentChatId: number,
   accessToken: string
 ): Promise<AxiosResponse<PeerId>> =>
-  API.get(`/users?currentChatId=${currentChatId}`, {
+  API.get(`/users/${currentChatId}/peerId`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

@@ -81,9 +81,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
       to: currentChatId,
     });
     // socket.current.emit("get-peer-id", currentChatId);
-    const peerId = await getPeerId(currentChatId, accessToken);
+    const peerId = (await getPeerId(currentChatId, accessToken)).data;
     console.log(peerId);
-
     var getUserMedia = navigator.mediaDevices.getUserMedia;
     getUserMedia({
       video: true,
